@@ -10,11 +10,11 @@ public class FieldValidation {
 
     }
 
-    public static void requiredValidEmail(String email) {
-        requiredValidEmail(email,null);
+    public static String requiredValidEmail(String email) {
+       return requiredValidEmail(email,null);
     }
 
-    public static void requiredValidEmail(String email, String errorMessage) {
+    public static String requiredValidEmail(String email, String errorMessage) {
        Objects.requireNonNull(email,errorMessage);
        if(email.isBlank()) {
            throw new IllegalArgumentException(errorMessage);
@@ -22,5 +22,6 @@ public class FieldValidation {
        if (!EmailValidator.getInstance().isValid(email)) {
            throw new IllegalArgumentException(errorMessage);
        }
+       return email;
     }
 }
