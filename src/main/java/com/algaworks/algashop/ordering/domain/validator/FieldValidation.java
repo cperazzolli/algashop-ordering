@@ -10,6 +10,17 @@ public class FieldValidation {
 
     }
 
+    public static void requeridNonBlanck(String value) {
+        requeridNonBlanck(value,"");
+    }
+
+    public static void requeridNonBlanck(String value, String errorMessage) {
+       Objects.requireNonNull(value);
+       if(value.isBlank()) {
+           throw new IllegalArgumentException(errorMessage);
+       }
+    }
+
     public static String requiredValidEmail(String email) {
        return requiredValidEmail(email,null);
     }

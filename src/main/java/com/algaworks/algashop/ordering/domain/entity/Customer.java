@@ -3,6 +3,7 @@ package com.algaworks.algashop.ordering.domain.entity;
 import com.algaworks.algashop.ordering.domain.exception.CustomerArchivedException;
 import com.algaworks.algashop.ordering.domain.validator.FieldValidation;
 import com.algaworks.algashop.ordering.domain.valueobject.*;
+import lombok.Builder;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -23,24 +24,49 @@ public class Customer {
     private OffsetDateTime registradAt;
     private OffsetDateTime archivedAt;
     private LoyaltyPoints loyaltyPoints;
+    private Address address;
 
-    public Customer(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
-                    OffsetDateTime registradAt,Boolean prommotionNotificationsAllowed) {
-        this.setId(id);
-        this.setFullName(fullName);
-        this.setBirthDate(birthDate);
-        this.setEmail(email);
-        this.setPhone(phone);
-        this.setDocument(document);
-        this.setRegistradAt(registradAt);
-        this.setPrommotionNotificationsAllowed(prommotionNotificationsAllowed);
-        this.setArchived(false);
-        this.setLoyaltyPoints(LoyaltyPoints.ZERO);
+    @Builder(builderClassName = "BrandNewCustomerBuild", builderMethodName = "brandNew")
+    private static Customer customer(FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
+                                    Boolean prommotionNotificationsAllowed,Address address) {
+        return new Customer(
+                new CustomerId(),
+                fullName,
+                birthDate,
+                email,
+                phone,
+                document,
+                prommotionNotificationsAllowed,
+                false,
+                OffsetDateTime.now(),
+                null,
+                LoyaltyPoints.ZERO,
+                address
+        );
+
+    }
+    @Builder(builderClassName = "ExistingCustomerBuild", builderMethodName = "existing")
+    private static Customer createExisting(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
+                                    Boolean prommotionNotificationsAllowed, Boolean archived, OffsetDateTime registradAt,
+                                    OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints,Address address) {
+        return new Customer(id,
+                fullName,
+                birthDate,
+                email,
+                phone,
+                document,
+                prommotionNotificationsAllowed,
+                archived,
+                registradAt,
+                archivedAt,
+                loyaltyPoints,
+                address);
+
     }
 
-    public Customer(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
+    private Customer(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
                     Boolean prommotionNotificationsAllowed, Boolean archived, OffsetDateTime registradAt,
-                    OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints) {
+                    OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints,Address address) {
         this.setId(id);
         this.setFullName(fullName);
         this.setBirthDate(birthDate);
@@ -53,6 +79,7 @@ public class Customer {
         this.setRegistradAt(registradAt);
         this.setAchivedAt(archivedAt);
         this.setLoyaltyPoints(loyaltyPoints);
+        this.setAddress(address);
     }
 
     public void addLoyaltyPoints(LoyaltyPoints loyaltyPointsAdded) {
@@ -72,6 +99,10 @@ public class Customer {
       this.setEmail(new Email(UUID.randomUUID() + "@anonymous.com"));
       this.setBirthDate(null);
       this.setPrommotionNotificationsAllowed(false);
+      this.setAddress(this.address.toBuilder()
+              .number("Anonymized")
+              .complement(null)
+              .build());
     }
 
     public void enablePromotionNotifications() {
@@ -92,6 +123,11 @@ public class Customer {
     public void changeEmail(Email email) {
         verifyIfChangeable();
         this.setEmail(email);
+    }
+
+    public void changeAddress(Address address) {
+        verifyIfChangeable();
+        this.setAddress(address);
     }
 
     public void changeBirthDate(BirthDate birthDate) {
@@ -125,6 +161,10 @@ public class Customer {
 
     public Boolean isPrommotionNotificationsAllowed() {
         return prommotionNotificationsAllowed;
+    }
+
+    public Address address() {
+        return address;
     }
 
     public boolean isArchived() {
@@ -190,6 +230,11 @@ public class Customer {
 
     private void setLoyaltyPoints(LoyaltyPoints loyaltyPoints) {
         this.loyaltyPoints = loyaltyPoints;
+    }
+
+    private void setAddress(Address address) {
+        Objects.requireNonNull(address);
+        this.address = address;
     }
 
     private void verifyIfChangeable() {
