@@ -5,12 +5,13 @@ import java.util.Objects;
 
 public record Quantity(Integer value) implements Comparable<Quantity> {
 
-    public Quantity(Integer value) {
+    public static final Quantity ZERO = new Quantity(0);
+
+    public Quantity {
         Objects.requireNonNull(value);
         if(value < 0) {
             throw new IllegalArgumentException();
         }
-        this.value = value;
     }
 
     public Quantity add(Quantity other) {

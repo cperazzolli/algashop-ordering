@@ -1,5 +1,7 @@
 package com.algaworks.algashop.ordering.domain.valueobject;
 
+import lombok.Builder;
+
 import java.util.Objects;
 
 public record BillingInfo(
@@ -8,6 +10,7 @@ public record BillingInfo(
         Phone phone,
         Address address
 ) {
+    @Builder(toBuilder = true)
     public BillingInfo(FullName fullName,Document document,Phone phone,Address address) {
         Objects.requireNonNull(fullName);
         Objects.requireNonNull(document);

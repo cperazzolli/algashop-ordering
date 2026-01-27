@@ -5,9 +5,11 @@ import java.util.Objects;
 
 public record Money(BigDecimal value) implements Comparable<Money> {
 
-    public Money(BigDecimal value) {
+    public static final Money ZERO = new Money(BigDecimal.ZERO);
+
+    public Money {
         Objects.requireNonNull(value);
-        this.value = value.setScale(2);
+        value.setScale(2);
     }
 
     public Money(String value) {
