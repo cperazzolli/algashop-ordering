@@ -11,7 +11,7 @@ import lombok.Builder;
 
 import java.util.Objects;
 
-public class OrderItem {
+public class OrderItem implements AggregateRoot<OrderItemId> {
 
     private OrderItemId id;
     private OrderId orderId;

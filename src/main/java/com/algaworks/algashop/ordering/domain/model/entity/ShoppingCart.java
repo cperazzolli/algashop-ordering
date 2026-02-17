@@ -11,7 +11,7 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.Set;
 
-public class ShoppingCart {
+public class ShoppingCart implements AggregateRoot<ShoppingCartId>{
 
     private ShoppingCartId id;
     private CustomerId customerId;
