@@ -37,11 +37,14 @@ public class Order implements AggregateRoot<OrderId> {
 
     private Set<OrderItem> items;
 
+    private Long version;
+
     @Builder(builderClassName = "ExistingOrderBuild", builderMethodName = "existing")
-    public Order(OrderId id, CustomerId customerId, Money totalAmount, Quantity totalItems, OffsetDateTime placedAt, OffsetDateTime paidAt,
+    public Order(OrderId id,Long version, CustomerId customerId, Money totalAmount, Quantity totalItems, OffsetDateTime placedAt, OffsetDateTime paidAt,
                  OffsetDateTime canceledAt, OffsetDateTime readyAt, Billing billing, Shipping shipping, OrderStatus status,
                  PaymentMethod paymentMethod, Set<OrderItem> items) {
         this.setId(id);
+        this.setVersion(version);
         this.setCustomerId(customerId);
         this.setTotalAmount(totalAmount);
         this.setTotalItems(totalItems);
@@ -60,6 +63,7 @@ public class Order implements AggregateRoot<OrderId> {
     public static Order draft(CustomerId customerId) {
         return new Order(
                 new OrderId(),
+                null,
                 customerId,
                 Money.ZERO,
                 Quantity.ZERO,
@@ -151,6 +155,12 @@ public class Order implements AggregateRoot<OrderId> {
         this.changeStatus(OrderStatus.PAID);
     }
 
+    public void canceled() {
+        this.changeStatus(OrderStatus.CANCELED);
+        this.setCanceledAt(OffsetDateTime.now());
+
+    }
+
     public void changedPaymentMethod(PaymentMethod paymentMethod) {
         Objects.requireNonNull(paymentMethod);
         verifyIfChangeable();
@@ -187,7 +197,7 @@ public class Order implements AggregateRoot<OrderId> {
     public void removeItem(OrderItemId orderItemId) {
         Objects.requireNonNull(orderItemId);
         verifyIfChangeable();
-        items().remove(this.findOrderItem(orderItemId));
+        this.items.remove(this.findOrderItem(orderItemId));
         recalculateTotals();
     }
 
@@ -273,6 +283,13 @@ public class Order implements AggregateRoot<OrderId> {
                 .orElseThrow(() -> new OrderDoesNotContainOrderException(this.id(), orderItemId));
     }
 
+    public Long version() {
+        return version;
+    }
+
+    private void setVersion(Long version) {
+        this.version = version;
+    }
 
     private void setId(OrderId id) {
         Objects.requireNonNull(id);
