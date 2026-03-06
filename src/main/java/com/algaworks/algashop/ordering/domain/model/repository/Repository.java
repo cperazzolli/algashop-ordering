@@ -9,5 +9,5 @@ public interface Repository<T extends AggregateRoot<ID>, ID> {
     Optional<T> ofId(ID id);
     Boolean existsById(ID id);
     void add(T aggregateRoot);
-    int count();
+    Long count();
 }

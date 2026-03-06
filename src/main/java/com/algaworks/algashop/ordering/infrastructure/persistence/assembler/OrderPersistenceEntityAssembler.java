@@ -98,6 +98,7 @@ public class OrderPersistenceEntityAssembler {
         billingEmbeddable.setLastName(billing.fullName().lastName());
         billingEmbeddable.setPhone(billing.phone().phone());
         billingEmbeddable.setDocument(billing.document().document());
+        billingEmbeddable.setEmail(billing.email().email());
         billingEmbeddable.setAddress(addressEmbeddable);
 
         return billingEmbeddable;

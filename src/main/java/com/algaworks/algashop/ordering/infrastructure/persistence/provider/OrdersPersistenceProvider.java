@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrdersPersistenceProvider implements Orders {
 
     private final OrderPersistenceEntityRepository persistenceRepository;
@@ -34,21 +36,22 @@ public class OrdersPersistenceProvider implements Orders {
 
     @Override
     public Boolean existsById(OrderId orderId) {
-        return null;
+        return persistenceRepository.existsById(orderId.value().toLong());
     }
 
     @Override
+    @Transactional(readOnly = false)
     public void add(Order aggregateRoot) {
         long aLong = aggregateRoot.id().value().toLong();
         persistenceRepository.findById(aLong)
                 .ifPresentOrElse(
-                        (persistenceEntity) -> {
-                            onUpdate(persistenceEntity,aggregateRoot);
-                            },
-                        () -> {
-                            onCreate(aggregateRoot);
-                });
+                        (persistenceEntity) -> onUpdate(persistenceEntity,aggregateRoot),
+                        () -> onCreate(aggregateRoot));
 
+    }
+    @Override
+    public Long count() {
+        return persistenceRepository.count();
     }
 
     private void onCreate(Order aggregateRoot) {
@@ -72,8 +75,4 @@ public class OrdersPersistenceProvider implements Orders {
         version.setAccessible(false);
     }
 
-    @Override
-    public int count() {
-        return 0;
-    }
 }
