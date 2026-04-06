@@ -25,7 +25,10 @@ public class OrderItem implements AggregateRoot<OrderItemId> {
     private Money totalAmount;
 
     @Builder(builderClassName = "ExistingOrderItemBuilder", builderMethodName = "existing")
-    public OrderItem(OrderItemId id, OrderId orderId, ProductId productId, ProductName productName, Money price, Quantity quantity, Money totalAmount) {
+    public OrderItem(OrderItemId id, OrderId orderId,
+                     ProductId productId, ProductName productName,
+                     Money price, Quantity quantity,
+                     Money totalAmount) {
         this.setId(id);
         this.setOrderId(orderId);
         this.setProductId(productId);
@@ -35,11 +38,14 @@ public class OrderItem implements AggregateRoot<OrderItemId> {
         this.setTotalAmount(totalAmount);
     }
 
-    @Builder(builderClassName = "BrandNewOrderItemBuilder", builderMethodName = "brandNewOrderItem")
-    private static OrderItem brandNew(OrderId orderId, Product product, Quantity quantity) {
-        Objects.requireNonNull(orderId);
+    @Builder(builderClassName = "BrandNewOrderItemBuilder", builderMethodName = "brandNew")
+    private static OrderItem createBrandNew(OrderId orderId,
+                                            Product product,
+                                            Quantity quantity) {
         Objects.requireNonNull(product);
+        Objects.requireNonNull(orderId);
         Objects.requireNonNull(quantity);
+
         OrderItem orderItem = new OrderItem(
                 new OrderItemId(),
                 orderId,
@@ -47,17 +53,18 @@ public class OrderItem implements AggregateRoot<OrderItemId> {
                 product.name(),
                 product.price(),
                 quantity,
-                Money.ZERO);
+                Money.ZERO
+        );
 
-        orderItem.recalculateTotal();
+        orderItem.recalculateTotals();
 
         return orderItem;
     }
 
-    void changeQuantity(Quantity newQuantity) {
-        Objects.requireNonNull(newQuantity);
-        this.setQuantity(newQuantity);
-        this.recalculateTotal();
+    void changeQuantity(Quantity quantity) {
+        Objects.requireNonNull(quantity);
+        this.setQuantity(quantity);
+        this.recalculateTotals();
     }
 
     public OrderItemId id() {
@@ -88,9 +95,10 @@ public class OrderItem implements AggregateRoot<OrderItemId> {
         return totalAmount;
     }
 
-    private void recalculateTotal() {
-        this.setTotalAmount(this.price.multiply(this.quantity));
+    private void recalculateTotals() {
+        this.setTotalAmount(this.price().multiply(this.quantity()));
     }
+
     private void setId(OrderItemId id) {
         Objects.requireNonNull(id);
         this.id = id;
@@ -137,6 +145,5 @@ public class OrderItem implements AggregateRoot<OrderItemId> {
     public int hashCode() {
         return Objects.hashCode(id);
     }
-
 
 }

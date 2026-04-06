@@ -20,9 +20,13 @@ public record Product(
         Objects.requireNonNull(inStock);
     }
 
-    public void chackOutOfStock() {
-        if(!inStock) {
+    public void checkOutOfStock() {
+        if (isOutOfStock()) {
             throw new ProductOutOfStockException(this.id());
         }
+    }
+
+    private boolean isOutOfStock() {
+        return !inStock();
     }
 }

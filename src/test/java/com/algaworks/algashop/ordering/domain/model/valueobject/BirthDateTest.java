@@ -14,7 +14,7 @@ class BirthDateTest {
     void shouldGeneratedBirthDate() {
         LocalDate date = LocalDate.of(1980, 6, 22);
         BirthDate birthDate = new BirthDate(date);
-        assertThat(birthDate.localDate()).isEqualTo(date);
+        assertThat(birthDate.value()).isEqualTo(date);
     }
 
     @Test

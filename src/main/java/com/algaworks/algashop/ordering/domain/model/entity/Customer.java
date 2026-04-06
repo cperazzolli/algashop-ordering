@@ -5,6 +5,7 @@ import com.algaworks.algashop.ordering.domain.model.valueobject.*;
 import com.algaworks.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import lombok.Builder;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -18,105 +19,86 @@ public class Customer implements AggregateRoot<CustomerId> {
     private Email email;
     private Phone phone;
     private Document document;
-    private Boolean prommotionNotificationsAllowed;
+    private Boolean promotionNotificationsAllowed;
     private Boolean archived;
-    private OffsetDateTime registradAt;
+    private OffsetDateTime registeredAt;
     private OffsetDateTime archivedAt;
     private LoyaltyPoints loyaltyPoints;
     private Address address;
 
+    private Long version;
+
     @Builder(builderClassName = "BrandNewCustomerBuild", builderMethodName = "brandNew")
-    private static Customer customer(FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
-                                    Boolean prommotionNotificationsAllowed,Address address) {
-        return new Customer(
-                new CustomerId(),
+    private static Customer createBrandNew(FullName fullName, BirthDate birthDate, Email email,
+                                           Phone phone, Document document, Boolean promotionNotificationsAllowed,
+                                           Address address) {
+        return new Customer(new CustomerId(),
+                null,
                 fullName,
                 birthDate,
                 email,
                 phone,
                 document,
-                prommotionNotificationsAllowed,
+                promotionNotificationsAllowed,
                 false,
                 OffsetDateTime.now(),
                 null,
                 LoyaltyPoints.ZERO,
-                address
-        );
-
-    }
-    @Builder(builderClassName = "ExistingCustomerBuild", builderMethodName = "existing")
-    private static Customer createExisting(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
-                                    Boolean prommotionNotificationsAllowed, Boolean archived, OffsetDateTime registradAt,
-                                    OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints,Address address) {
-        return new Customer(id,
-                fullName,
-                birthDate,
-                email,
-                phone,
-                document,
-                prommotionNotificationsAllowed,
-                archived,
-                registradAt,
-                archivedAt,
-                loyaltyPoints,
                 address);
-
     }
 
-    private Customer(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
-                    Boolean prommotionNotificationsAllowed, Boolean archived, OffsetDateTime registradAt,
-                    OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints,Address address) {
+    @Builder(builderClassName = "ExistingCustomerBuild", builderMethodName = "existing")
+    private Customer(CustomerId id, Long version, FullName fullName, BirthDate birthDate, Email email, Phone phone,
+                     Document document, Boolean promotionNotificationsAllowed, Boolean archived,
+                     OffsetDateTime registeredAt, OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints, Address address) {
         this.setId(id);
+        this.setVersion(version);
         this.setFullName(fullName);
         this.setBirthDate(birthDate);
         this.setEmail(email);
         this.setPhone(phone);
         this.setDocument(document);
-        this.setRegistradAt(registradAt);
-        this.setPrommotionNotificationsAllowed(prommotionNotificationsAllowed);
+        this.setPromotionNotificationsAllowed(promotionNotificationsAllowed);
         this.setArchived(archived);
-        this.setRegistradAt(registradAt);
-        this.setAchivedAt(archivedAt);
+        this.setRegisteredAt(registeredAt);
+        this.setArchivedAt(archivedAt);
         this.setLoyaltyPoints(loyaltyPoints);
         this.setAddress(address);
     }
 
     public void addLoyaltyPoints(LoyaltyPoints loyaltyPointsAdded) {
-      verifyIfChangeable();
-       this.setLoyaltyPoints(this.loyaltyPoints.add(loyaltyPointsAdded));
+        verifyIfChangeable();
+        this.setLoyaltyPoints(this.loyaltyPoints().add(loyaltyPointsAdded));
     }
 
     public void archive() {
-      if (this.isArchived()) {
-         throw new CustomerArchivedException();
-      }
-      this.setArchived(true);
-      this.setAchivedAt(OffsetDateTime.now());
-      this.setFullName(new FullName("Anonymous","Anonymous"));
-      this.setPhone(new Phone("00-0000-0000"));
-      this.setDocument(new Document("000-00-0000"));
-      this.setEmail(new Email(UUID.randomUUID() + "@anonymous.com"));
-      this.setBirthDate(null);
-      this.setPrommotionNotificationsAllowed(false);
-      this.setAddress(this.address.toBuilder()
-              .number("Anonymized")
-              .complement(null)
-              .build());
+        verifyIfChangeable();
+        this.setArchived(true);
+        this.setArchivedAt(OffsetDateTime.now());
+        this.setFullName(new FullName("Anonymous", "Anonymous"));
+        this.setPhone(new Phone("000-000-0000"));
+        this.setDocument(new Document("000-00-0000"));
+        this.setEmail(new Email(UUID.randomUUID() + "@anonymous.com"));
+        this.setBirthDate(null);
+        this.setPromotionNotificationsAllowed(false);
+        this.setAddress(this.address().toBuilder()
+                .number("Anonymized")
+                .complement(null).build());
     }
 
     public void enablePromotionNotifications() {
         verifyIfChangeable();
-        this.setPrommotionNotificationsAllowed(true);
+        this.setPromotionNotificationsAllowed(true);
     }
 
     public void disablePromotionNotifications() {
         verifyIfChangeable();
-        this.setPrommotionNotificationsAllowed(false);
+        this.setPromotionNotificationsAllowed(false);
     }
 
-    public void changeName(FullName newName) {
+    public void changeName(FullName fullName) {
         verifyIfChangeable();
-        this.setFullName(newName);
+        this.setFullName(fullName);
     }
 
     public void changeEmail(Email email) {
@@ -124,14 +106,14 @@ public class Customer implements AggregateRoot<CustomerId> {
         this.setEmail(email);
     }
 
+    public void changePhone(Phone phone) {
+        verifyIfChangeable();
+        this.setPhone(phone);
+    }
+
     public void changeAddress(Address address) {
         verifyIfChangeable();
         this.setAddress(address);
-    }
-
-    public void changeBirthDate(BirthDate birthDate) {
-        verifyIfChangeable();
-        this.setBirthDate(birthDate);
     }
 
     public CustomerId id() {
@@ -158,28 +140,36 @@ public class Customer implements AggregateRoot<CustomerId> {
         return document;
     }
 
-    public Boolean isPrommotionNotificationsAllowed() {
-        return prommotionNotificationsAllowed;
+    public Boolean isPromotionNotificationsAllowed() {
+        return promotionNotificationsAllowed;
+    }
+
+    public Boolean isArchived() {
+        return archived;
+    }
+
+    public OffsetDateTime registeredAt() {
+        return registeredAt;
+    }
+
+    public OffsetDateTime archivedAt() {
+        return archivedAt;
+    }
+
+    public LoyaltyPoints loyaltyPoints() {
+        return loyaltyPoints;
     }
 
     public Address address() {
         return address;
     }
 
-    public boolean isArchived() {
-        return archived;
+    public Long version() {
+        return version;
     }
 
-    public OffsetDateTime registradAt() {
-        return registradAt;
-    }
-
-    public OffsetDateTime quiveredAt() {
-        return archivedAt;
-    }
-
-    public LoyaltyPoints loyaltyPoints() {
-        return loyaltyPoints;
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     private void setId(CustomerId id) {
@@ -188,29 +178,36 @@ public class Customer implements AggregateRoot<CustomerId> {
     }
 
     private void setFullName(FullName fullName) {
-        Objects.requireNonNull(fullName,VALIDATION_ERROR_FULLNAME_IS_NULL);
+        Objects.requireNonNull(fullName, VALIDATION_ERROR_FULLNAME_IS_NULL);
         this.fullName = fullName;
     }
 
     private void setBirthDate(BirthDate birthDate) {
+        if (birthDate == null) {
+            this.birthDate = null;
+            return;
+        }
         this.birthDate = birthDate;
     }
 
     private void setEmail(Email email) {
+        Objects.requireNonNull(email);
         this.email = email;
     }
 
     private void setPhone(Phone phone) {
+        Objects.requireNonNull(phone);
         this.phone = phone;
     }
 
     private void setDocument(Document document) {
+        Objects.requireNonNull(document);
         this.document = document;
     }
 
-    private void setPrommotionNotificationsAllowed(Boolean prommotionNotificationsAllowed) {
-        Objects.requireNonNull(prommotionNotificationsAllowed);
-        this.prommotionNotificationsAllowed = prommotionNotificationsAllowed;
+    private void setPromotionNotificationsAllowed(Boolean promotionNotificationsAllowed) {
+        Objects.requireNonNull(promotionNotificationsAllowed);
+        this.promotionNotificationsAllowed = promotionNotificationsAllowed;
     }
 
     private void setArchived(Boolean archived) {
@@ -218,16 +215,17 @@ public class Customer implements AggregateRoot<CustomerId> {
         this.archived = archived;
     }
 
-    private void setRegistradAt(OffsetDateTime registradAt) {
-        Objects.requireNonNull(registradAt);
-        this.registradAt = registradAt;
+    private void setRegisteredAt(OffsetDateTime registeredAt) {
+        Objects.requireNonNull(registeredAt);
+        this.registeredAt = registeredAt;
     }
 
-    private void setAchivedAt(OffsetDateTime archivedAt) {
+    private void setArchivedAt(OffsetDateTime archivedAt) {
         this.archivedAt = archivedAt;
     }
 
     private void setLoyaltyPoints(LoyaltyPoints loyaltyPoints) {
+        Objects.requireNonNull(loyaltyPoints);
         this.loyaltyPoints = loyaltyPoints;
     }
 
@@ -237,7 +235,7 @@ public class Customer implements AggregateRoot<CustomerId> {
     }
 
     private void verifyIfChangeable() {
-        if(this.isArchived()) {
+        if (this.isArchived()) {
             throw new CustomerArchivedException();
         }
     }

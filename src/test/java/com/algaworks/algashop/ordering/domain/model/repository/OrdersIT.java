@@ -1,12 +1,14 @@
 package com.algaworks.algashop.ordering.domain.model.repository;
 
-import com.algaworks.algashop.ordering.domain.model.entity.Order;
-import com.algaworks.algashop.ordering.domain.model.entity.OrderStatus;
-import com.algaworks.algashop.ordering.domain.model.entity.OrderTestDataBuilder;
+import com.algaworks.algashop.ordering.domain.model.entity.*;
 import com.algaworks.algashop.ordering.domain.model.valueobject.id.OrderId;
+import com.algaworks.algashop.ordering.infrastructure.persistence.assembler.CustomerPersistenceEntityAssembler;
 import com.algaworks.algashop.ordering.infrastructure.persistence.assembler.OrderPersistenceEntityAssembler;
+import com.algaworks.algashop.ordering.infrastructure.persistence.disasembler.CustomerPersistenceEntityDisassembler;
 import com.algaworks.algashop.ordering.infrastructure.persistence.disasembler.OrderPersistenceEntityDisassembler;
+import com.algaworks.algashop.ordering.infrastructure.persistence.provider.CustomerPersistenceProvider;
 import com.algaworks.algashop.ordering.infrastructure.persistence.provider.OrdersPersistenceProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -20,14 +22,27 @@ import static org.assertj.core.api.Assertions.*;
 @DataJpaTest
 @Import({OrdersPersistenceProvider.class,
         OrderPersistenceEntityAssembler.class,
-        OrderPersistenceEntityDisassembler.class})
+        OrderPersistenceEntityDisassembler.class,
+        CustomerPersistenceProvider.class,
+        CustomerPersistenceEntityAssembler.class,
+        CustomerPersistenceEntityDisassembler.class})
 class OrdersIT {
 
     private Orders orders;
+    private Customers customers;
+
 
     @Autowired
-    public OrdersIT(Orders orders) {
+    public OrdersIT(Orders orders, Customers customers) {
         this.orders = orders;
+        this.customers = customers;
+    }
+
+    @BeforeEach
+    void setUp() {
+        if(!customers.existsById(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID)){
+            customers.add(CustomerTestDataBuilder.brandNewCustomer().build());
+        }
     }
 
     @Test
@@ -50,7 +65,7 @@ class OrdersIT {
                 o -> assertThat(o.status()).isEqualTo(originalOrder.status()),
                 o -> assertThat(o.paymentMethod()).isEqualTo(originalOrder.paymentMethod()),
                 o -> assertThat(o.paidAt()).isEqualTo(originalOrder.paidAt()),
-                o -> assertThat(o.canceladAt()).isEqualTo(originalOrder.canceladAt())
+                o -> assertThat(o.canceledAt()).isEqualTo(originalOrder.canceledAt())
         );
 
     }
@@ -83,14 +98,14 @@ class OrdersIT {
         orderT1.markAsPaid();
         orders.add(orderT1);
 
-        orderT2.canceled();
+        orderT2.canceledAt();
 
         assertThatExceptionOfType(ObjectOptimisticLockingFailureException.class)
                 .isThrownBy(() -> orders.add(orderT2));
 
         Order savedOrder = orders.ofId(order.id()).orElseThrow();
 
-        assertThat(savedOrder.canceladAt()).isNull();
+        assertThat(savedOrder.canceledAt()).isNull();
         assertThat(savedOrder.paidAt()).isNotNull();
     }
 }

@@ -14,47 +14,33 @@ public class CustomerPersistenceEntityAssembler {
         return merge(new CustomerPersistenceEntity(),customer);
     }
 
-    public CustomerPersistenceEntity merge(CustomerPersistenceEntity customerPersistenceEntity,Customer customer) {
+    public CustomerPersistenceEntity merge(CustomerPersistenceEntity customerPersistenceEntity, Customer customer) {
         customerPersistenceEntity.setId(customer.id().value());
-        customerPersistenceEntity.setBilling(billingFrom(customer));
-        customerPersistenceEntity.setBirthDate(customer.birthDate().localDate());
-        customerPersistenceEntity.setPromotionNotificationsAllowed(customer.isPrommotionNotificationsAllowed());
+        customerPersistenceEntity.setFirstName(customer.fullName().firstName());
+        customerPersistenceEntity.setLastName(customer.fullName().lastName());
+        customerPersistenceEntity.setBirthDate(customer.birthDate() != null ? customer.birthDate().value() : null);
+        customerPersistenceEntity.setEmail(customer.email().value());
+        customerPersistenceEntity.setPhone(customer.phone().value());
+        customerPersistenceEntity.setDocument(customer.document().value());
+        customerPersistenceEntity.setPromotionNotificationsAllowed(customer.isPromotionNotificationsAllowed());
         customerPersistenceEntity.setArchived(customer.isArchived());
-        customerPersistenceEntity.setRegistradAt(customer.registradAt());
-        customerPersistenceEntity.setArchivedAt(customer.quiveredAt());
+        customerPersistenceEntity.setRegisteredAt(customer.registeredAt());
+        customerPersistenceEntity.setArchivedAt(customer.registeredAt());
         customerPersistenceEntity.setLoyaltyPoints(customer.loyaltyPoints().value());
+        customerPersistenceEntity.setAddress(toAddressEmbeddable(customer.address()));
+        customerPersistenceEntity.setVersion(customer.version());
         return customerPersistenceEntity;
     }
 
-    public AddressEmbeddable addressEmbeddable(Address address) {
-        return new AddressEmbeddable(
-                address.street(),
-                address.number(),
-                address.complement(),
-                address.neighborhood(),
-                address.city(),
-                address.state(),
-                address.zipCode().value()
-        );
-    }
-
-    public BillingEmbeddable billingFrom(Customer billing) {
-        BillingEmbeddable billingEmbeddable = new BillingEmbeddable();
-        AddressEmbeddable addressEmbeddable = new AddressEmbeddable();
-        addressEmbeddable.setStreet(billing.address().street());
-        addressEmbeddable.setNumber(billing.address().number());
-        addressEmbeddable.setComplement(billing.address().complement());
-        addressEmbeddable.setNeighborhood(billing.address().neighborhood());
-        addressEmbeddable.setCity(billing.address().city());
-        addressEmbeddable.setState(billing.address().state());
-        addressEmbeddable.setZipCode(billing.address().zipCode().value());
-        billingEmbeddable.setFirstName(billing.fullName().firstName());
-        billingEmbeddable.setLastName(billing.fullName().lastName());
-        billingEmbeddable.setPhone(billing.phone().phone());
-        billingEmbeddable.setDocument(billing.document().document());
-        billingEmbeddable.setEmail(billing.email().email());
-        billingEmbeddable.setAddress(addressEmbeddable);
-
-        return billingEmbeddable;
+    private AddressEmbeddable toAddressEmbeddable(Address address) {
+        return AddressEmbeddable.builder()
+                .city(address.city())
+                .state(address.state())
+                .number(address.number())
+                .street(address.street())
+                .complement(address.complement())
+                .neighborhood(address.neighborhood())
+                .zipCode(address.zipCode().value())
+                .build();
     }
 }

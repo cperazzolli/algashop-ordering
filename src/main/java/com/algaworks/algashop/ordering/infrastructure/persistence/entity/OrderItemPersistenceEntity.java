@@ -6,10 +6,12 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+
+
 @Entity
-@Table(name = "order_items")
+@Table(name = "order_item")
 @Data
-@ToString(of ="id")
+@ToString(of= "id")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +21,7 @@ public class OrderItemPersistenceEntity {
     @Id
     @EqualsAndHashCode.Include
     private Long id;
-    private UUID productID;
+    private UUID productId;
     private String productName;
     private BigDecimal price;
     private Integer quantity;
@@ -29,10 +31,11 @@ public class OrderItemPersistenceEntity {
     @ManyToOne(optional = false)
     private OrderPersistenceEntity order;
 
-    public Long order() {
-        if(getOrder() == null) {
+    public Long getOrderId() {
+        if (getOrder() == null) {
             return null;
         }
+
         return getOrder().getId();
     }
 }

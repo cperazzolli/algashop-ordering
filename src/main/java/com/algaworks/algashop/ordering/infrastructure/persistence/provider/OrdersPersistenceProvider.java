@@ -40,6 +40,11 @@ public class OrdersPersistenceProvider implements Orders {
     }
 
     @Override
+    public Long count() {
+        return persistenceRepository.count();
+    }
+
+    @Override
     @Transactional(readOnly = false)
     public void add(Order aggregateRoot) {
         long aLong = aggregateRoot.id().value().toLong();
@@ -48,10 +53,6 @@ public class OrdersPersistenceProvider implements Orders {
                         (persistenceEntity) -> onUpdate(persistenceEntity,aggregateRoot),
                         () -> onCreate(aggregateRoot));
 
-    }
-    @Override
-    public Long count() {
-        return persistenceRepository.count();
     }
 
     private void onCreate(Order aggregateRoot) {

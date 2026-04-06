@@ -32,7 +32,7 @@ public class CustomerPersistenceProvider implements Customers {
     public Optional<Customer> ofId(CustomerId customerId) {
         var possibleEntity = persistenceRepository
                 .findById(customerId.value());
-        return possibleEntity.map(disassembler::toDomainCustomer);
+        return possibleEntity.map(disassembler::toDomainEntity);
     }
 
     @Override
@@ -41,38 +41,41 @@ public class CustomerPersistenceProvider implements Customers {
     }
 
     @Override
+    @Transactional(readOnly = false)
     public void add(Customer aggregateRoot) {
-        UUID aLong = aggregateRoot.id().value();
-        persistenceRepository.findById(aLong)
+        UUID customerId = aggregateRoot.id().value();
+
+        persistenceRepository.findById(customerId)
                 .ifPresentOrElse(
-                        (persistenceEntity) -> onUpdate(persistenceEntity,aggregateRoot),
-                        () -> onCreate(aggregateRoot));
+                        (persistenceEntity) -> update(aggregateRoot, persistenceEntity),
+                        ()-> insert(aggregateRoot)
+                );
     }
 
-    @Override
-    public Long count() {
-        return persistenceRepository.count();
-    }
-
-    private void onCreate(Customer aggregateRoot) {
-        var persistenceEntity = assembler.fromDomain(aggregateRoot);
-        persistenceRepository.saveAndFlush(persistenceEntity);
-        updateVersion(aggregateRoot,persistenceEntity);
-    }
-
-    private void onUpdate(CustomerPersistenceEntity persistenceEntity, Customer aggregateRoot) {
+    private void update(Customer aggregateRoot, CustomerPersistenceEntity persistenceEntity) {
         persistenceEntity = assembler.merge(persistenceEntity, aggregateRoot);
         entityManager.detach(persistenceEntity);
         persistenceEntity = persistenceRepository.saveAndFlush(persistenceEntity);
-        updateVersion(aggregateRoot,persistenceEntity);
+        updateVersion(aggregateRoot, persistenceEntity);
+    }
+
+    private void insert(Customer aggregateRoot) {
+        CustomerPersistenceEntity persistenceEntity = assembler.fromDomain(aggregateRoot);
+        persistenceRepository.saveAndFlush(persistenceEntity);
+        updateVersion(aggregateRoot, persistenceEntity);
     }
 
     @SneakyThrows
     private void updateVersion(Customer aggregateRoot, CustomerPersistenceEntity persistenceEntity) {
         Field version = aggregateRoot.getClass().getDeclaredField("version");
         version.setAccessible(true);
-        ReflectionUtils.setField(version,aggregateRoot, persistenceEntity.getVersion());
+        ReflectionUtils.setField(version, aggregateRoot, persistenceEntity.getVersion());
         version.setAccessible(false);
+    }
+
+    @Override
+    public Long count() {
+        return persistenceRepository.count();
     }
 
 }

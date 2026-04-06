@@ -10,33 +10,33 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomerPersistenceEntityDisassembler {
 
-    public Customer toDomainCustomer(CustomerPersistenceEntity customerPersistenceEntity) {
+    public Customer toDomainEntity(CustomerPersistenceEntity entity) {
         return Customer.existing()
-                .id(new CustomerId(customerPersistenceEntity.getId()))
-                .fullName(new FullName(customerPersistenceEntity.getBilling().getLastName(), customerPersistenceEntity.getBilling().getFirstName()))
-                .birthDate(new BirthDate(customerPersistenceEntity.getBirthDate()))
-                .email(new Email(customerPersistenceEntity.getBilling().getEmail()))
-                .phone(new Phone(customerPersistenceEntity.getBilling().getPhone()))
-                .document(new Document(customerPersistenceEntity.getBilling().getDocument()))
-                .prommotionNotificationsAllowed(customerPersistenceEntity.getPromotionNotificationsAllowed())
-                .archived(customerPersistenceEntity.getArchived())
-                .registradAt(customerPersistenceEntity.getRegistradAt())
-                .archivedAt(customerPersistenceEntity.getArchivedAt())
-                .loyaltyPoints(new LoyaltyPoints(customerPersistenceEntity.getLoyaltyPoints()))
-                .address(toDomainAddress(customerPersistenceEntity.getBilling().getAddress()))
+                .id(new CustomerId(entity.getId()))
+                .fullName(new FullName(entity.getLastName(), entity.getFirstName()))
+                .birthDate(entity.getBirthDate() != null ? new BirthDate(entity.getBirthDate()) : null)
+                .email(new Email(entity.getEmail()))
+                .phone(new Phone(entity.getPhone()))
+                .document(new Document(entity.getDocument()))
+                .loyaltyPoints(new LoyaltyPoints(entity.getLoyaltyPoints()))
+                .promotionNotificationsAllowed(entity.getPromotionNotificationsAllowed())
+                .archived(entity.getArchived())
+                .registeredAt(entity.getRegisteredAt())
+                .archivedAt(entity.getArchivedAt())
+                .address(toAddressValueObject(entity.getAddress()))
+                .version(entity.getVersion())
                 .build();
-
     }
 
-    public Address toDomainAddress(AddressEmbeddable addressEmbeddable) {
-        return new Address(
-                addressEmbeddable.getStreet(),
-                addressEmbeddable.getNumber(),
-                addressEmbeddable.getComplement(),
-                addressEmbeddable.getNeighborhood(),
-                addressEmbeddable.getCity(),
-                addressEmbeddable.getState(),
-                new ZipCode(addressEmbeddable.getZipCode())
-        );
+    private Address toAddressValueObject(AddressEmbeddable address) {
+        return Address.builder()
+                .street(address.getStreet())
+                .number(address.getNumber())
+                .complement(address.getComplement())
+                .neighborhood(address.getNeighborhood())
+                .city(address.getCity())
+                .state(address.getState())
+                .zipCode(new ZipCode(address.getZipCode()))
+                .build();
     }
 }

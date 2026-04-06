@@ -1,6 +1,6 @@
 package com.algaworks.algashop.ordering.infrastructure.persistence.entity;
 
-import com.algaworks.algashop.ordering.infrastructure.persistence.embeddable.BillingEmbeddable;
+import com.algaworks.algashop.ordering.infrastructure.persistence.embeddable.AddressEmbeddable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
@@ -15,57 +15,51 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@ToString(of="id")
-@Table(name = "\"cutomer\"")
+@ToString(of = "id")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@NoArgsConstructor
+@Table(name = "\"customer\"")
+@AllArgsConstructor
+@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class CustomerPersistenceEntity {
 
     @Id
     @EqualsAndHashCode.Include
     private UUID id;
+    private String firstName;
+    private String lastName;
     private LocalDate birthDate;
+    private String email;
+    private String phone;
+    private String document;
     private Boolean promotionNotificationsAllowed;
     private Boolean archived;
-    private OffsetDateTime registradAt;
+    private OffsetDateTime registeredAt;
     private OffsetDateTime archivedAt;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "street", column = @Column(name = "address_street")),
+            @AttributeOverride(name = "number", column = @Column(name = "address_number")),
+            @AttributeOverride(name = "complement", column = @Column(name = "address_complement")),
+            @AttributeOverride(name = "neighborhood", column = @Column(name = "address_neighborhood")),
+            @AttributeOverride(name = "city", column = @Column(name = "address_city")),
+            @AttributeOverride(name = "state", column = @Column(name = "address_state")),
+            @AttributeOverride(name = "zipCode", column = @Column(name = "address_zipCode"))
+    })
+    private AddressEmbeddable address;
     private Integer loyaltyPoints;
 
     @Version
     private Long version;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "firstName", column = @Column(name = "billing_first_name")),
-            @AttributeOverride(name = "lastName", column = @Column(name = "billing_last_name")),
-            @AttributeOverride(name = "document", column = @Column(name = "billing_document")),
-            @AttributeOverride(name = "phone", column = @Column(name = "billing_phone")),
-            @AttributeOverride(name = "address.street", column = @Column(name = "billing_address_street")),
-            @AttributeOverride(name = "address.number", column = @Column(name = "billing_address_number")),
-            @AttributeOverride(name = "address.complement", column = @Column(name = "billing_address_complement")),
-            @AttributeOverride(name = "address.neighborhood", column = @Column(name = "billing_address_neighborhood")),
-            @AttributeOverride(name = "address.city", column = @Column(name = "billing_address_city")),
-            @AttributeOverride(name = "address.state", column = @Column(name = "billing_address_state")),
-            @AttributeOverride(name = "address.zipCode", column = @Column(name = "billing_address_zipCode"))
-    })
-    private BillingEmbeddable billing;
-
     @CreatedBy
     private UUID createdByUserId;
-
-    @LastModifiedBy
-    private UUID lastModifiedByUserId;
 
     @LastModifiedDate
     private OffsetDateTime lastModifiedAt;
 
-    public Long version() {
-        return version;
-    }
-
-    private void setVersion(Long version) {
-        this.version = version;
-    }
-
+    @LastModifiedBy
+    private UUID lastModifiedByUserId;
 }

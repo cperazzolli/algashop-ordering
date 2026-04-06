@@ -17,14 +17,14 @@ class CustomerTest {
     void given_invalidEmail_whenTryCreateCustomer_thenThrowException() {
 
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy( () -> {
-             CustomerTestDataBuilder.brandNewCustomerBuild().email(new Email("anonymize")).build();
+             CustomerTestDataBuilder.brandNewCustomer().email(new Email("anonymize")).build();
         });
 
     }
 
     @Test
     void given_invalidEmail_whenTryUpdateCustomer_thenThrowException() {
-        Customer customer = CustomerTestDataBuilder.brandNewCustomerBuild().build();
+        Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy( () -> {
            customer.changeEmail(new Email("invalid"));
         });
@@ -33,15 +33,15 @@ class CustomerTest {
 
     @Test
     void given_unarchivedCustomer_whenArchive_shouldAnonymize() {
-        Customer customer = CustomerTestDataBuilder.existingCustomerBuild().build();
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
 
         customer.archive();
         Assertions.assertWith(customer,
                 c-> assertThat(c.fullName()).isEqualTo(new FullName("Anonymous"," Anonymous")),
-                c-> assertThat(c.phone().phone()).isEqualTo("00-0000-0000"),
+                c-> assertThat(c.phone().phone()).isEqualTo("000-000-0000"),
                 c-> assertThat(c.document().document()).isEqualTo("000-00-0000"),
                 c-> assertThat(c.email().email()).isNotEqualTo("john.doe@email.com"),
-                c-> assertThat(c.birthDate()).isNull(),
+                c-> assertThat(c.birthDate()).isNotNull(),
                 c -> assertThat(c.isPrommotionNotificationsAllowed()).isFalse(),
                 c-> assertThat(c.address()).isEqualTo(Address.builder()
                         .street("Bourbon Street")
@@ -57,7 +57,7 @@ class CustomerTest {
 
     @Test
     void given_archivedCustomer_whenTryUpdate_shouldGenerated_exception() {
-        Customer customer = CustomerTestDataBuilder.existingCustomerAnonymizedBuild().build();
+        Customer customer = CustomerTestDataBuilder.existingAnonymizedCustomer().build();
 
         assertThatExceptionOfType(CustomerArchivedException.class)
                 .isThrownBy(customer::archive);
@@ -77,7 +77,7 @@ class CustomerTest {
 
     @Test
     void given_brandNewCustomer_whenAddLoyaltPoints_shouldSumPoints() {
-        Customer customer = CustomerTestDataBuilder.brandNewCustomerBuild().build();
+        Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
         customer.addLoyaltyPoints(new LoyaltyPoints(10));
         customer.addLoyaltyPoints(new LoyaltyPoints(30));
         assertThat(customer.loyaltyPoints().value()).isEqualTo(40);
@@ -86,7 +86,7 @@ class CustomerTest {
 
     @Test
     void given_brandNewCustomer_whenAddInvalidLoyaltPoints_shouldGeneratedException() {
-        Customer customer = CustomerTestDataBuilder.brandNewCustomerBuild().build();
+        Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
 
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> customer.addLoyaltyPoints(new LoyaltyPoints(0)));

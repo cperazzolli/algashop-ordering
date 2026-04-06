@@ -21,7 +21,7 @@ public class OrderPersistenceEntityDisassembler {
     public Order toDomainOrder(OrderPersistenceEntity orderPersistenceEntity) {
        return Order.existing()
                .id(new OrderId(orderPersistenceEntity.getId()))
-               .customerId(new CustomerId(orderPersistenceEntity.getCustomerId()))
+               .customerId(new CustomerId(orderPersistenceEntity.getCustumer()))
                .totalAmount(new Money(orderPersistenceEntity.getTotalAmount()))
                .totalItems(new Quantity(orderPersistenceEntity.getTotalItems()))
                .status(OrderStatus.valueOf(orderPersistenceEntity.getStatus()))

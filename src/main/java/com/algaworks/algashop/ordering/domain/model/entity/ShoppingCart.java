@@ -44,7 +44,7 @@ public class ShoppingCart implements AggregateRoot<ShoppingCartId>{
     public void addItem(Product product, Quantity quantity) {
         Objects.requireNonNull(product);
         Objects.requireNonNull(quantity);
-        product.chackOutOfStock();
+        product.checkOutOfStock();
         setId(id());
         setCustomerId(customerId());
         setAmount(product.price());
