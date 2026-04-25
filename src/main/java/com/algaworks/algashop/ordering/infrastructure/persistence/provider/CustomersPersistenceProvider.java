@@ -2,6 +2,7 @@ package com.algaworks.algashop.ordering.infrastructure.persistence.provider;
 
 import com.algaworks.algashop.ordering.domain.model.entity.Customer;
 import com.algaworks.algashop.ordering.domain.model.repository.Customers;
+import com.algaworks.algashop.ordering.domain.model.valueobject.Email;
 import com.algaworks.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import com.algaworks.algashop.ordering.infrastructure.persistence.assembler.CustomerPersistenceEntityAssembler;
 import com.algaworks.algashop.ordering.infrastructure.persistence.disasembler.CustomerPersistenceEntityDisassembler;
@@ -21,22 +22,22 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CustomerPersistenceProvider implements Customers {
+public class CustomersPersistenceProvider implements Customers {
 
     private final CustomerPersistenceEntityRepository persistenceRepository;
     private final CustomerPersistenceEntityAssembler assembler;
     private final CustomerPersistenceEntityDisassembler disassembler;
+
     private final EntityManager entityManager;
 
     @Override
     public Optional<Customer> ofId(CustomerId customerId) {
-        var possibleEntity = persistenceRepository
-                .findById(customerId.value());
-        return possibleEntity.map(disassembler::toDomainEntity);
+        return persistenceRepository.findById(customerId.value())
+                .map(disassembler::toDomainEntity);
     }
 
     @Override
-    public Boolean existsById(CustomerId customerId) {
+    public boolean exists(CustomerId customerId) {
         return persistenceRepository.existsById(customerId.value());
     }
 
@@ -74,8 +75,13 @@ public class CustomerPersistenceProvider implements Customers {
     }
 
     @Override
-    public Long count() {
+    public long count() {
         return persistenceRepository.count();
     }
 
+    @Override
+    public Optional<Customer> ofEmail(Email email) {
+        return persistenceRepository.findByEmail(email.value())
+                .map(disassembler::toDomainEntity);
+    }
 }

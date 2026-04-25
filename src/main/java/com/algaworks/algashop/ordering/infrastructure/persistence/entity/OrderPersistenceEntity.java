@@ -19,7 +19,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString(of="id")
+@ToString(of = "id")
 @Table(name = "\"order\"")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @EntityListeners(AuditingEntityListener.class)
@@ -36,8 +36,8 @@ public class OrderPersistenceEntity {
     private BigDecimal totalAmount;
     private Integer totalItems;
     private String status;
-
     private String paymentMethod;
+
     private OffsetDateTime placedAt;
     private OffsetDateTime paidAt;
     private OffsetDateTime canceledAt;
@@ -45,8 +45,10 @@ public class OrderPersistenceEntity {
 
     @CreatedBy
     private UUID createdByUserId;
+
     @LastModifiedDate
     private OffsetDateTime lastModifiedAt;
+
     @LastModifiedBy
     private UUID lastModifiedByUserId;
 
@@ -58,6 +60,7 @@ public class OrderPersistenceEntity {
             @AttributeOverride(name = "firstName", column = @Column(name = "billing_first_name")),
             @AttributeOverride(name = "lastName", column = @Column(name = "billing_last_name")),
             @AttributeOverride(name = "document", column = @Column(name = "billing_document")),
+            @AttributeOverride(name = "email", column = @Column(name = "billing_email")),
             @AttributeOverride(name = "phone", column = @Column(name = "billing_phone")),
             @AttributeOverride(name = "address.street", column = @Column(name = "billing_address_street")),
             @AttributeOverride(name = "address.number", column = @Column(name = "billing_address_number")),
@@ -87,13 +90,11 @@ public class OrderPersistenceEntity {
     })
     private ShippingEmbeddable shipping;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<OrderItemPersistenceEntity> items = new HashSet<>();
 
     @Builder
-    public OrderPersistenceEntity(Long id, CustomerPersistenceEntity customer, BigDecimal totalAmount, Integer totalItems, String status,
-                                  String paymentMethod, OffsetDateTime placedAt, OffsetDateTime paidAt, OffsetDateTime canceledAt, OffsetDateTime readyAt,
-                                  UUID createdByUserId, OffsetDateTime lastModifiedAt, UUID lastModifiedByUserId, Long version, BillingEmbeddable billing, ShippingEmbeddable shipping, Set<OrderItemPersistenceEntity> items) {
+    public OrderPersistenceEntity(Long id, CustomerPersistenceEntity customer, BigDecimal totalAmount, Integer totalItems, String status, String paymentMethod, OffsetDateTime placedAt, OffsetDateTime paidAt, OffsetDateTime canceledAt, OffsetDateTime readyAt, UUID createdByUserId, OffsetDateTime lastModifiedAt, UUID lastModifiedByUserId, Long version, BillingEmbeddable billing, ShippingEmbeddable shipping, Set<OrderItemPersistenceEntity> items) {
         this.id = id;
         this.customer = customer;
         this.totalAmount = totalAmount;
@@ -110,11 +111,11 @@ public class OrderPersistenceEntity {
         this.version = version;
         this.billing = billing;
         this.shipping = shipping;
-        replaceItems(items);
+        this.replaceItems(items);
     }
 
     public void replaceItems(Set<OrderItemPersistenceEntity> items) {
-        if(items == null || items.isEmpty()) {
+        if (items == null || items.isEmpty()) {
             this.setItems(new HashSet<>());
             return;
         }
@@ -124,20 +125,20 @@ public class OrderPersistenceEntity {
     }
 
     public void addItem(OrderItemPersistenceEntity item) {
-        if(item == null) {
+        if (item == null) {
             return;
         }
 
-        if(this.items == null) {
+        if (this.getItems() == null) {
             this.setItems(new HashSet<>());
         }
 
         item.setOrder(this);
-        this.items.add(item);
+        this.getItems().add(item);
     }
 
-    public UUID getCustumer() {
-        if(this.customer == null) {
+    public UUID getCustomerId() {
+        if (this.customer == null) {
             return null;
         }
         return this.customer.getId();

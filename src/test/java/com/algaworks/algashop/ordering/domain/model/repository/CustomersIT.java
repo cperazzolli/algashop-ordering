@@ -2,11 +2,12 @@ package com.algaworks.algashop.ordering.domain.model.repository;
 
 import com.algaworks.algashop.ordering.domain.model.entity.Customer;
 import com.algaworks.algashop.ordering.domain.model.entity.CustomerTestDataBuilder;
+import com.algaworks.algashop.ordering.domain.model.valueobject.Email;
 import com.algaworks.algashop.ordering.domain.model.valueobject.FullName;
 import com.algaworks.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import com.algaworks.algashop.ordering.infrastructure.persistence.assembler.CustomerPersistenceEntityAssembler;
 import com.algaworks.algashop.ordering.infrastructure.persistence.disasembler.CustomerPersistenceEntityDisassembler;
-import com.algaworks.algashop.ordering.infrastructure.persistence.provider.CustomerPersistenceProvider;
+import com.algaworks.algashop.ordering.infrastructure.persistence.provider.CustomersPersistenceProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +16,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DataJpaTest
-@Import({CustomerPersistenceProvider.class,
+@Import({CustomersPersistenceProvider.class,
         CustomerPersistenceEntityAssembler.class,
         CustomerPersistenceEntityDisassembler.class})
 class CustomersIT {
@@ -106,8 +108,24 @@ class CustomersIT {
         Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
         customers.add(customer);
 
-        Assertions.assertThat(customers.existsById(customer.id())).isTrue();
-        Assertions.assertThat(customers.existsById(new CustomerId())).isFalse();
+        Assertions.assertThat(customers.exists(customer.id())).isTrue();
+        Assertions.assertThat(customers.exists(new CustomerId())).isFalse();
+    }
+
+    @Test
+    void shouldFindByEmail() {
+        Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+        customers.add(customer);
+
+        Optional<Customer> customerOptional = customers.ofEmail(customer.email());
+
+        assertThat(customerOptional).isPresent();
+    }
+
+    @Test
+    void shouldNotFindByEmailIfNoCustomerExistsWhitEmail() {
+        Optional<Customer> customerOptional = customers.ofEmail(new Email(UUID.randomUUID().toString() + "@email.com.br"));
+        assertThat(customerOptional).isNotPresent();
     }
 
 }

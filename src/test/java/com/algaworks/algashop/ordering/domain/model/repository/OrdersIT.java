@@ -6,7 +6,7 @@ import com.algaworks.algashop.ordering.infrastructure.persistence.assembler.Cust
 import com.algaworks.algashop.ordering.infrastructure.persistence.assembler.OrderPersistenceEntityAssembler;
 import com.algaworks.algashop.ordering.infrastructure.persistence.disasembler.CustomerPersistenceEntityDisassembler;
 import com.algaworks.algashop.ordering.infrastructure.persistence.disasembler.OrderPersistenceEntityDisassembler;
-import com.algaworks.algashop.ordering.infrastructure.persistence.provider.CustomerPersistenceProvider;
+import com.algaworks.algashop.ordering.infrastructure.persistence.provider.CustomersPersistenceProvider;
 import com.algaworks.algashop.ordering.infrastructure.persistence.provider.OrdersPersistenceProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,12 +20,14 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@Import({OrdersPersistenceProvider.class,
+@Import({
+        OrdersPersistenceProvider.class,
         OrderPersistenceEntityAssembler.class,
         OrderPersistenceEntityDisassembler.class,
-        CustomerPersistenceProvider.class,
+        CustomersPersistenceProvider.class,
         CustomerPersistenceEntityAssembler.class,
-        CustomerPersistenceEntityDisassembler.class})
+        CustomerPersistenceEntityDisassembler.class
+})
 class OrdersIT {
 
     private Orders orders;
@@ -40,14 +42,19 @@ class OrdersIT {
 
     @BeforeEach
     void setUp() {
-        if(!customers.existsById(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID)){
+        if(!customers.exists(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID)){
             customers.add(CustomerTestDataBuilder.brandNewCustomer().build());
         }
     }
 
     @Test
     void shouldPersistentAndFind() {
-        Order originalOrder = OrderTestDataBuilder.anOrder().build();
+        Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+        customers.add(customer);
+
+        Order originalOrder = OrderTestDataBuilder.anOrder()
+                .customerId(customer.id())
+                .build();
         OrderId orderId = originalOrder.id();
         orders.add(originalOrder);
 
@@ -72,7 +79,12 @@ class OrdersIT {
 
     @Test
     void shouldUpdateExistentOrder() {
-        Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).build();
+        Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+        customers.add(customer);
+
+        Order order = OrderTestDataBuilder.anOrder()
+                .customerId(customer.id())
+                .status(OrderStatus.PLACED).build();
         orders.add(order);
 
         order = orders.ofId(order.id()).orElseThrow();
@@ -89,7 +101,12 @@ class OrdersIT {
 
     @Test
     void shouldNotAllowStaleUpdate() {
-        Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).build();
+        Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+        customers.add(customer);
+
+        Order order = OrderTestDataBuilder.anOrder()
+                .customerId(customer.id())
+                .status(OrderStatus.PLACED).build();
         orders.add(order);
 
         Order orderT1 = orders.ofId(order.id()).orElseThrow();

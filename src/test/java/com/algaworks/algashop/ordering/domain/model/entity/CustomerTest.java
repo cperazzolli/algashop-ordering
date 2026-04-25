@@ -38,11 +38,11 @@ class CustomerTest {
         customer.archive();
         Assertions.assertWith(customer,
                 c-> assertThat(c.fullName()).isEqualTo(new FullName("Anonymous"," Anonymous")),
-                c-> assertThat(c.phone().phone()).isEqualTo("000-000-0000"),
-                c-> assertThat(c.document().document()).isEqualTo("000-00-0000"),
-                c-> assertThat(c.email().email()).isNotEqualTo("john.doe@email.com"),
+                c-> assertThat(c.phone()).isEqualTo("000-000-0000"),
+                c-> assertThat(c.document()).isEqualTo("000-00-0000"),
+                c-> assertThat(c.email()).isNotEqualTo("john.doe@email.com"),
                 c-> assertThat(c.birthDate()).isNotNull(),
-                c -> assertThat(c.isPrommotionNotificationsAllowed()).isFalse(),
+                c -> assertThat(c.isPromotionNotificationsAllowed()).isFalse(),
                 c-> assertThat(c.address()).isEqualTo(Address.builder()
                         .street("Bourbon Street")
                         .number("Anonymized")

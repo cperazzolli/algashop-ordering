@@ -37,7 +37,6 @@ public class CustomerPersistenceEntity {
     private Boolean archived;
     private OffsetDateTime registeredAt;
     private OffsetDateTime archivedAt;
-
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "street", column = @Column(name = "address_street")),
@@ -49,6 +48,7 @@ public class CustomerPersistenceEntity {
             @AttributeOverride(name = "zipCode", column = @Column(name = "address_zipCode"))
     })
     private AddressEmbeddable address;
+
     private Integer loyaltyPoints;
 
     @Version

@@ -44,7 +44,7 @@ public class OrderPersistenceEntityTestDataBuilder {
                 .quantity(2)
                 .totalAmount(new BigDecimal(1000))
                 .productName("Notebook")
-                .productID(IdGenerator.generateTimeBasesUUID());
+                .productId(IdGenerator.generateTimeBasesUUID());
     }
 
     public static OrderItemPersistenceEntity.OrderItemPersistenceEntityBuilder existingItemAlt() {
@@ -54,7 +54,7 @@ public class OrderPersistenceEntityTestDataBuilder {
                 .quantity(1)
                 .totalAmount(new BigDecimal(250))
                 .productName("Mouse Pad")
-                .productID(IdGenerator.generateTimeBasesUUID());
+                .productId(IdGenerator.generateTimeBasesUUID());
     }
 
     public static BillingEmbeddable.BillingEmbeddableBuilder billing() {
