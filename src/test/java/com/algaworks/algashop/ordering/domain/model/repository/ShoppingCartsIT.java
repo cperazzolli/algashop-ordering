@@ -1,11 +1,12 @@
 package com.algaworks.algashop.ordering.domain.model.repository;
 
-import com.algaworks.algashop.ordering.domain.model.entity.*;
+import com.algaworks.algashop.ordering.domain.model.entity.CustomerTestDataBuilder;
+import com.algaworks.algashop.ordering.domain.model.entity.ShoppingCart;
+import com.algaworks.algashop.ordering.domain.model.entity.ShoppingCartTestDateBuilder;
 import com.algaworks.algashop.ordering.infrastructure.persistence.assembler.CustomerPersistenceEntityAssembler;
 import com.algaworks.algashop.ordering.infrastructure.persistence.assembler.ShoppingCartPersistenceEntityAssembler;
 import com.algaworks.algashop.ordering.infrastructure.persistence.disasembler.CustomerPersistenceEntityDisassembler;
 import com.algaworks.algashop.ordering.infrastructure.persistence.disasembler.ShoppingCartPersistenceEntityDisassembler;
-import com.algaworks.algashop.ordering.infrastructure.persistence.entity.ShoppingCartPersistenceEntity;
 import com.algaworks.algashop.ordering.infrastructure.persistence.provider.CustomersPersistenceProvider;
 import com.algaworks.algashop.ordering.infrastructure.persistence.provider.ShoppingCartsPersistenceProvider;
 import org.junit.jupiter.api.BeforeEach;
