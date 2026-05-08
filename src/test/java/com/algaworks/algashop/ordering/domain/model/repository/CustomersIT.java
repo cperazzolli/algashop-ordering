@@ -128,4 +128,13 @@ class CustomersIT {
         assertThat(customerOptional).isNotPresent();
     }
 
+    @Test
+    void shouldReturnIfEmailInUse() {
+        Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+        customers.add(customer);
+
+        assertThat(customers.isEmailUnique(customer.email(),customer.id())).isTrue();
+        assertThat(customers.isEmailUnique(customer.email(),new CustomerId())).isFalse();
+        assertThat(customers.isEmailUnique(new Email("alex@email.com.br"),customer.id())).isTrue();
+    }
 }

@@ -41,6 +41,23 @@ public class CustomersPersistenceProvider implements Customers {
         return persistenceRepository.existsById(customerId.value());
     }
 
+
+    @Override
+    public long count() {
+        return persistenceRepository.count();
+    }
+
+    @Override
+    public Optional<Customer> ofEmail(Email email) {
+        return persistenceRepository.findByEmail(email.value())
+                .map(disassembler::toDomainEntity);
+    }
+
+    @Override
+    public Boolean isEmailUnique(Email email, CustomerId excetCustomerId) {
+        return !persistenceRepository.existsByEmailAndIdNot(email.value(), excetCustomerId.value());
+    }
+
     @Override
     @Transactional(readOnly = false)
     public void add(Customer aggregateRoot) {
@@ -72,16 +89,5 @@ public class CustomersPersistenceProvider implements Customers {
         version.setAccessible(true);
         ReflectionUtils.setField(version, aggregateRoot, persistenceEntity.getVersion());
         version.setAccessible(false);
-    }
-
-    @Override
-    public long count() {
-        return persistenceRepository.count();
-    }
-
-    @Override
-    public Optional<Customer> ofEmail(Email email) {
-        return persistenceRepository.findByEmail(email.value())
-                .map(disassembler::toDomainEntity);
     }
 }
