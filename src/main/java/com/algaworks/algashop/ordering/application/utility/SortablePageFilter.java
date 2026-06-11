@@ -6,8 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Sort;
 
-import javax.swing.*;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
