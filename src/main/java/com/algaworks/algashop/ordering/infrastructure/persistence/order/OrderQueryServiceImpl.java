@@ -2,6 +2,7 @@ package com.algaworks.algashop.ordering.infrastructure.persistence.order;
 
 import com.algaworks.algashop.ordering.application.order.query.*;
 import com.algaworks.algashop.ordering.application.utility.Mapper;
+import com.algaworks.algashop.ordering.application.utility.PageFilter;
 import com.algaworks.algashop.ordering.domain.model.order.OrderId;
 import com.algaworks.algashop.ordering.domain.model.order.OrderNotFoundException;
 import jakarta.persistence.EntityManager;
@@ -53,10 +54,12 @@ public class OrderQueryServiceImpl implements OrderQueryService {
         CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
         Root<OrderPersistenceEntity> root = criteriaQuery.from(OrderPersistenceEntity.class);
 
-        Predicate[] predicates = toPredicates(builder, root, filter);
         Expression<Long> count = builder.count(root);
+        Predicate[] predicates = toPredicates(builder, root, filter);
+
         criteriaQuery.select(count);
         criteriaQuery.where(predicates);
+
         TypedQuery<Long> query = entityManager.createQuery(criteriaQuery);
 
         return query.getSingleResult();
@@ -89,14 +92,12 @@ public class OrderQueryServiceImpl implements OrderQueryService {
                                 customer.get("document"),
                                 customer.get("phone")
                         )
-                        )
+                    )
         );
-
         Predicate[] predicates = toPredicates(builder, root, filter);
-        Order sortOrder = toSortOrder(builder,root,filter);
+        Order sortOrder = toSortOrder(builder, root, filter);
 
         criteriaQuery.where(predicates);
-
         if (sortOrder != null) {
             criteriaQuery.orderBy(sortOrder);
         }
@@ -113,39 +114,30 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 
     private Order toSortOrder(CriteriaBuilder builder, Root<OrderPersistenceEntity> root, OrderFilter filter) {
 
-        if(filter.getSortDirectionOrDefault() == Sort.Direction.ASC) {
-            return builder.asc(
-                    root.get(filter.getSortByPropertyOrDefault().getPropertyName())
-            );
+        if (filter.getSortDirectionOrDefault() == Sort.Direction.ASC) {
+            return builder.asc(root.get(filter.getSortByPropertyOrDefault().getPropertyName()));
         }
 
-        if(filter.getSortDirectionOrDefault() == Sort.Direction.DESC) {
-            return builder.desc(
-                    root.get(filter.getSortByPropertyOrDefault().getPropertyName())
-            );
+        if (filter.getSortDirectionOrDefault() == Sort.Direction.DESC) {
+            return builder.desc(root.get(filter.getSortByPropertyOrDefault().getPropertyName()));
         }
 
         return null;
     }
 
     private Predicate[] toPredicates(CriteriaBuilder builder,
-                                     Root<OrderPersistenceEntity> root,
-                                     OrderFilter filter) {
-
+                                     Root<OrderPersistenceEntity> root, OrderFilter filter) {
         List<Predicate> predicates = new ArrayList<>();
 
-        if(filter.getCustomerId() != null) {
-            Path<Object> customerIdPath = root.get("customer").get("id");
-            UUID expectedCustomerId = filter.getCustomerId();
-            Predicate predicate = builder.equal(customerIdPath, expectedCustomerId);
-            predicates.add(predicate);
+        if (filter.getCustomerId() != null) {
+            predicates.add(builder.equal(root.get("customer").get("id"), filter.getCustomerId()));
         }
 
-        if(filter.getStatus() != null && !filter.getStatus().isBlank()) {
-            predicates.add(builder.equal(root.get("status"), filter.getStatus().toUpperCase()));
+        if (filter.getStatus() != null && !filter.getStatus().isBlank()) {
+            predicates.add(builder.equal(root.get("status"), filter. getStatus().toUpperCase()));
         }
 
-        if(filter.getOrderId() != null) {
+        if (filter.getOrderId() != null) {
             long orderIdLongValue;
             try {
                 OrderId orderId = new OrderId(filter.getOrderId());
@@ -153,7 +145,6 @@ public class OrderQueryServiceImpl implements OrderQueryService {
             } catch (IllegalArgumentException e) {
                 orderIdLongValue = 0L;
             }
-
             predicates.add(builder.equal(root.get("id"), orderIdLongValue));
         }
 
@@ -162,7 +153,7 @@ public class OrderQueryServiceImpl implements OrderQueryService {
         }
 
         if (filter.getPlacedAtTo() != null) {
-            predicates.add(builder.greaterThanOrEqualTo(root.get("placedAt"), filter.getPlacedAtTo()));
+            predicates.add(builder.lessThanOrEqualTo(root.get("placedAt"), filter.getPlacedAtTo()));
         }
 
         if (filter.getTotalAmountFrom() != null) {
@@ -170,10 +161,9 @@ public class OrderQueryServiceImpl implements OrderQueryService {
         }
 
         if (filter.getTotalAmountTo() != null) {
-            predicates.add(builder.greaterThanOrEqualTo(root.get("totalAmount"), filter.getTotalAmountTo()));
+            predicates.add(builder.lessThanOrEqualTo(root.get("totalAmount"), filter.getTotalAmountTo()));
         }
 
         return predicates.toArray(new Predicate[]{});
     }
-
 }

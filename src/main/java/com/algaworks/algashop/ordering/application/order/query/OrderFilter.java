@@ -22,31 +22,30 @@ public class OrderFilter extends SortablePageFilter<OrderFilter.SortType> {
     private BigDecimal totalAmountFrom;
     private BigDecimal totalAmountTo;
 
-    public OrderFilter(int size,int page) {
-        super(size,page);
+    public OrderFilter(int size, int page) {
+        super(size, page);
     }
 
     @Override
     public SortType getSortByPropertyOrDefault() {
-        return getSortedByProperty() == null ? SortType.PLACED_AT : getSortedByProperty();
+        return getSortByProperty() == null ? SortType.PLACE_AT : getSortByProperty();
     }
 
     @Override
     public Sort.Direction getSortDirectionOrDefault() {
-        return getDirection() == null ? Sort.Direction.ASC : getDirection();
+        return getSortDirection() == null ? Sort.Direction.ASC : getSortDirection();
     }
 
     @Getter
     @RequiredArgsConstructor
     public enum SortType {
-        PLACED_AT("placedAt"),
+        PLACE_AT("placedAt"),
         PAID_AT("paidAt"),
         CANCELED_AT("canceledAt"),
         READY_AT("readyAt"),
         PAYMENT_METHOD("paymentMethod"),
         STATUS("status");
+
         private final String propertyName;
     }
-
-
 }

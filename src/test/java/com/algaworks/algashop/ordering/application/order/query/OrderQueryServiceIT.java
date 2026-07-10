@@ -1,6 +1,6 @@
 package com.algaworks.algashop.ordering.application.order.query;
 
-
+import com.algaworks.algashop.ordering.application.utility.PageFilter;
 import com.algaworks.algashop.ordering.domain.model.customer.Customer;
 import com.algaworks.algashop.ordering.domain.model.customer.CustomerId;
 import com.algaworks.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
@@ -16,8 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @SpringBootTest
 @Transactional
@@ -53,7 +51,7 @@ class OrderQueryServiceIT {
     }
 
     @Test
-    void shouldFilterByPage() {
+    public void shouldFilterByPage() {
         Customer customer = CustomerTestDataBuilder.existingCustomer().build();
         customers.add(customer);
 
@@ -70,9 +68,8 @@ class OrderQueryServiceIT {
         Assertions.assertThat(page.getNumberOfElements()).isEqualTo(3);
     }
 
-
     @Test
-    void shouldByFilterByCustomerId() {
+    public void shouldFilterByCustomerId() {
         Customer customer1 = CustomerTestDataBuilder.existingCustomer().build();
         customers.add(customer1);
 
@@ -88,7 +85,6 @@ class OrderQueryServiceIT {
         OrderFilter filter = new OrderFilter();
         filter.setCustomerId(customer1.id().value());
 
-
         Page<OrderSummaryOutput> page = queryService.filter(filter);
 
         Assertions.assertThat(page.getTotalPages()).isEqualTo(1);
@@ -97,12 +93,13 @@ class OrderQueryServiceIT {
     }
 
     @Test
-    void shouldByFilterByMultipleParams() {
+    public void shouldFilterByMultipleParams() {
         Customer customer1 = CustomerTestDataBuilder.existingCustomer().build();
         customers.add(customer1);
-        Order order1 = OrderTestDataBuilder.anOrder().status(OrderStatus.DRAFT).withItems(false).customerId(customer1.id()).build();
+
+        orders.add(OrderTestDataBuilder.anOrder().status(OrderStatus.DRAFT).withItems(false).customerId(customer1.id()).build());
+        Order order1 = OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).customerId(customer1.id()).build();
         orders.add(order1);
-        orders.add(OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).customerId(customer1.id()).build());
 
         Customer customer2 = CustomerTestDataBuilder.existingCustomer().id(new CustomerId()).build();
         customers.add(customer2);
@@ -114,6 +111,7 @@ class OrderQueryServiceIT {
         filter.setCustomerId(customer1.id().value());
         filter.setStatus(OrderStatus.PLACED.toString().toLowerCase());
         filter.setTotalAmountFrom(order1.totalAmount().value());
+
         Page<OrderSummaryOutput> page = queryService.filter(filter);
 
         Assertions.assertThat(page.getTotalPages()).isEqualTo(1);
@@ -122,12 +120,13 @@ class OrderQueryServiceIT {
     }
 
     @Test
-    void givenInvalidOrderId_whenFilter_emptyPage() {
+    public void givenInvalidOrderId_whenFilter_shouldReturnEmptyPage() {
         Customer customer1 = CustomerTestDataBuilder.existingCustomer().build();
         customers.add(customer1);
-        Order order1 = OrderTestDataBuilder.anOrder().status(OrderStatus.DRAFT).withItems(false).customerId(customer1.id()).build();
+
+        orders.add(OrderTestDataBuilder.anOrder().status(OrderStatus.DRAFT).withItems(false).customerId(customer1.id()).build());
+        Order order1 = OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).customerId(customer1.id()).build();
         orders.add(order1);
-        orders.add(OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).customerId(customer1.id()).build());
 
         Customer customer2 = CustomerTestDataBuilder.existingCustomer().id(new CustomerId()).build();
         customers.add(customer2);
@@ -136,16 +135,17 @@ class OrderQueryServiceIT {
         orders.add(OrderTestDataBuilder.anOrder().status(OrderStatus.CANCELED).customerId(customer2.id()).build());
 
         OrderFilter filter = new OrderFilter();
-        filter.setOrderId("ABCD");
+        filter.setOrderId("ABC");
+
         Page<OrderSummaryOutput> page = queryService.filter(filter);
 
-        Assertions.assertThat(page.getTotalPages()).isZero();
-        Assertions.assertThat(page.getTotalElements()).isZero();
-        Assertions.assertThat(page.getNumberOfElements()).isZero();
+        Assertions.assertThat(page.getTotalPages()).isEqualTo(0);
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(0);
+        Assertions.assertThat(page.getNumberOfElements()).isEqualTo(0);
     }
 
     @Test
-    void shouldOrderByStatus() {
+    public void shouldOrderByStatus() {
         Customer customer1 = CustomerTestDataBuilder.existingCustomer().build();
         customers.add(customer1);
 
@@ -159,11 +159,12 @@ class OrderQueryServiceIT {
         orders.add(OrderTestDataBuilder.anOrder().status(OrderStatus.CANCELED).customerId(customer2.id()).build());
 
         OrderFilter filter = new OrderFilter();
-        filter.setSortedByProperty(OrderFilter.SortType.STATUS);
-        filter.setDirection(Sort.Direction.ASC);
+        filter.setSortByProperty(OrderFilter.SortType.STATUS);
+        filter.setSortDirection(Sort.Direction.ASC);
+
         Page<OrderSummaryOutput> page = queryService.filter(filter);
 
-
-        assertThat(page.getContent().getFirst().getStatus()).isEqualTo(OrderStatus.CANCELED.toString());
+        Assertions.assertThat(page.getContent().getFirst().getStatus()).isEqualTo(OrderStatus.CANCELED.toString());
     }
+
 }
