@@ -1,6 +1,5 @@
 package com.algaworks.algashop.ordering.presentation;
 
-import com.algaworks.algashop.ordering.application.customer.management.CustomerUpdateInput;
 import com.algaworks.algashop.ordering.domain.model.DomainEntityNotFoundException;
 import com.algaworks.algashop.ordering.domain.model.DomainException;
 import com.algaworks.algashop.ordering.domain.model.customer.CustomerEmailIsInUseException;
