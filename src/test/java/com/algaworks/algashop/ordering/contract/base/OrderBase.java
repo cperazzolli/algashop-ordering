@@ -25,7 +25,7 @@ class OrderBase {
     @MockitoBean
     private OrderQueryService orderQueryService;
 
-    public static final String notFoundOrderId = "01226N0693HDH";
+    public static final String NOT_FOUND_ORDER_ID = "01226N0693HDH";
 
     @BeforeEach
     void setUp() {
@@ -39,7 +39,7 @@ class OrderBase {
         when(orderQueryService.findById(validOrderId))
                 .thenReturn(OrderDetailOutputTestDataBuilder.placedOrder(validOrderId).build());
 
-        when(orderQueryService.findById(notFoundOrderId))
+        when(orderQueryService.findById(NOT_FOUND_ORDER_ID))
                 .thenThrow(new OrderNotFoundException());
     }
 }
