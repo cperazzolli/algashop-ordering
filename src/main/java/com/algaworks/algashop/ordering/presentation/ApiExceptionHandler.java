@@ -54,7 +54,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         problemDetail.setTitle("Not found");
         problemDetail.setDetail(e.getMessage());
         problemDetail.setType(URI.create("/errors/not-found"));
+        return problemDetail;
+    }
 
+    @ExceptionHandler({DomainException.class,UnprocessableEntityException.class})
+    public ProblemDetail handleUnprocessableEntityException(Exception e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
+        problemDetail.setTitle("Unprocessable Entity");
+        problemDetail.setDetail(e.getMessage());
+        problemDetail.setType(URI.create("/errors/unprocessable-entity"));
         return problemDetail;
     }
 
@@ -64,17 +72,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         problemDetail.setTitle("Conflict");
         problemDetail.setDetail(e.getMessage());
         problemDetail.setType(URI.create("/errors/conflict"));
-
-        return problemDetail;
-    }
-
-    @ExceptionHandler(DomainException.class)
-    public ProblemDetail handleCustomerEmailIsInUseException(DomainException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
-        problemDetail.setTitle("Unprocessable Entity");
-        problemDetail.setDetail(e.getMessage());
-        problemDetail.setType(URI.create("/errors/unprocessable-entity"));
-
         return problemDetail;
     }
 
@@ -83,9 +80,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         log.error(e.getMessage(), e);
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         problemDetail.setTitle("Internal Server Error");
-        problemDetail.setDetail("An unexpected internal error occurred");
+        problemDetail.setDetail("An unexpected internal error occurred.");
         problemDetail.setType(URI.create("/errors/internal"));
-
         return problemDetail;
     }
 }

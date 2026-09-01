@@ -5,7 +5,7 @@ import com.algaworks.algashop.ordering.domain.model.order.OrderStatus;
 import com.algaworks.algashop.ordering.domain.model.order.PaymentMethod;
 import com.algaworks.algashop.ordering.domain.model.commons.Money;
 import com.algaworks.algashop.ordering.domain.model.commons.Quantity;
-import com.algaworks.algashop.ordering.domain.model.customer.CustomerId;
+import com.algaworks.algashop.ordering.domain.model.customer.ProductId;
 import com.algaworks.algashop.ordering.domain.model.order.OrderId;
 import com.algaworks.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity;
 import com.algaworks.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntityTestDataBuilder;
@@ -24,7 +24,7 @@ class OrderPersistenceEntityDisassemblerTest {
         Order domainEntity = disassembler.toDomainEntity(persistenceEntity);
         assertThat(domainEntity).satisfies(
                 s -> assertThat(s.id()).isEqualTo(new OrderId(persistenceEntity.getId())),
-                s -> assertThat(s.customerId()).isEqualTo(new CustomerId(persistenceEntity.getCustomerId())),
+                s -> assertThat(s.customerId()).isEqualTo(new ProductId(persistenceEntity.getCustomerId())),
                 s -> assertThat(s.totalAmount()).isEqualTo(new Money(persistenceEntity.getTotalAmount())),
                 s -> assertThat(s.totalItems()).isEqualTo(new Quantity(persistenceEntity.getTotalItems())),
                 s -> assertThat(s.placedAt()).isEqualTo(persistenceEntity.getPlacedAt()),

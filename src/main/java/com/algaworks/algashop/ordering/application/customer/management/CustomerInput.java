@@ -20,18 +20,25 @@ import java.time.LocalDate;
 public class CustomerInput {
     @NotBlank
     private String firstName;
+
     @NotBlank
     private String lastName;
+
     @NotBlank
     @Email
     private String email;
+
     @NotBlank
     private String phone;
+
     @NotBlank
     private String document;
+
     @NotNull
     @Past
     private LocalDate birthDate;
+
+    @NotNull
     private Boolean promotionNotificationsAllowed;
 
     @NotNull

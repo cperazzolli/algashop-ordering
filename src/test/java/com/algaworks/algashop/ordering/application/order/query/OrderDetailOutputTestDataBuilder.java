@@ -17,6 +17,7 @@ public class OrderDetailOutputTestDataBuilder {
     public static OrderDetailOutput.OrderDetailOutputBuilder placedOrder() {
         return placedOrder(new OrderId().toString());
     }
+
     public static OrderDetailOutput.OrderDetailOutputBuilder placedOrder(String orderId) {
         return OrderDetailOutput.builder()
                 .id(orderId)
@@ -37,7 +38,7 @@ public class OrderDetailOutputTestDataBuilder {
                 .status("PLACED")
                 .paymentMethod("GATEWAY_BALANCE")
                 .shipping(ShippingData.builder()
-                        .cost(new BigDecimal("20.50"))
+                        .cost(new BigDecimal("20.5"))
                         .expectedDate(LocalDate.now().plusDays(2))
                         .recipient(RecipientData.builder()
                                 .firstName("John")
@@ -73,8 +74,8 @@ public class OrderDetailOutputTestDataBuilder {
                 .items(itemsOutput(orderId));
     }
 
-    private static List itemsOutput(String orderId) {
-        List items = new ArrayList<>();
+    private static List<OrderItemDetailOutput> itemsOutput(String orderId) {
+        List<OrderItemDetailOutput> items = new ArrayList<>();
         items.add(OrderItemDetailOutput.builder()
                 .id(new OrderItemId().toString())
                 .orderId(orderId)
@@ -82,7 +83,7 @@ public class OrderDetailOutputTestDataBuilder {
                 .productName("Notebook Dive Gamer X11")
                 .price(new BigDecimal("19.99"))
                 .quantity(2)
-                .totalAmount(new BigDecimal("19.99"))
+                .totalAmount(new BigDecimal("41.98"))
                 .build());
         return items;
     }
